@@ -35,13 +35,11 @@
             <span>&laquo;</span>
           </a>
         </li>
-        <template v-for="page in totalPages">
-          <li class="page-item " v-bind:class="{active : currentPage == page, pointer : currentPage != page}" @click=toPage(page)>
-            <a class="page-link">
-              {{ page }}
-            </a>
-          </li>
-        </template>
+        <li v-for="page in totalPages" class="page-item" v-bind:class="{active : currentPage == page, pointer : currentPage != page}" @click=toPage(page)>
+          <a class="page-link">
+            {{ page }}
+          </a>
+        </li>
         <li class="page-item" v-bind:class="{disabled : currentPage == totalPages, pointer : currentPage != totalPages}" @click="nextPage">
           <a class="page-link">
             <span>&raquo;</span>
@@ -50,102 +48,120 @@
       </ul>
     </nav>
   </div>
-
 </main>
 
 <script type="module">
-  // Vue Petite Library to Handle Display, Search, Sort, Pagination of Data.
+  // Vue Library to Handle Display, Search, Sort, Pagination of Data.
   import {
     createApp
-  } from "https://unpkg.com/petite-vue@0.2.2/dist/petite-vue.es.js";
-
-  // Inserted data using EJS into JS
-  const records = <%- JSON.stringify(records) %>;
+  } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js'
 
   createApp({
-    originalRecords: records,
-    filteredRecords: records.slice(1),
-    recordStartIndex: 0,
-    recordEndIndex: 100,
-    currentPage: 1,
-    rowLimit: 100,
-    sortOrder: records[0].map(() => true),
-    searchInput: "",
-    searchByHeaderInput: 0,
-
-    get headers() {
-      return this.originalRecords[0];
-    },
-    get totalPages() {
-      return Math.ceil(this.filteredRecords.length / this.rowLimit);
-    },
-    get pageRecords() {
-      return this.filteredRecords.slice(this.recordStartIndex, this.recordEndIndex);
-    },
-    updateRecordIndex() {
-      this.recordStartIndex = (this.currentPage - 1) * this.rowLimit;
-      this.recordEndIndex = this.recordStartIndex + this.rowLimit;
-      this.scrollToTop();
-    },
-    previousPage() {
-      if (this.currentPage == 1) {
-        return;
+    data() {
+      return {
+        originalRecords: [],
+        filteredRecords: [],
+        recordStartIndex: 0,
+        recordEndIndex: 100,
+        currentPage: 1,
+        rowLimit: 100,
+        sortOrder: [],
+        searchInput: "",
+        searchByHeaderInput: 0,
+        loading: true,
       }
-      this.currentPage -= 1;
-      this.updateRecordIndex();
     },
-    nextPage() {
-      if (this.currentPage == this.totalPages) {
-        return;
+    computed: {
+      headers() {
+        return this.originalRecords[0];
+      },
+      totalPages() {
+        return Math.ceil(this.filteredRecords.length / this.rowLimit);
+      },
+      pageRecords() {
+        return this.filteredRecords.slice(this.recordStartIndex, this.recordEndIndex);
       }
-      this.currentPage += 1;
-      this.updateRecordIndex();
     },
-    toPage(page) {
-      this.currentPage = page;
-      this.updateRecordIndex();
-    },
-    sortBy(columnIndex) {
-      // Toggling sort, by keeping sortOrder boolean variable
-      // True: Asc and False: desc
-      this.filteredRecords.sort((a, b) => {
-        if (this.sortOrder[columnIndex]) {
-          if (isNaN(a[columnIndex]) || isNaN(b[columnIndex])) {
-            return a[columnIndex] > b[columnIndex];
+    methods: {
+      updateRecordIndex() {
+        this.recordStartIndex = (this.currentPage - 1) * this.rowLimit;
+        this.recordEndIndex = this.recordStartIndex + this.rowLimit;
+        this.scrollToTop();
+      },
+      previousPage() {
+        if (this.currentPage == 1) {
+          return;
+        }
+        this.currentPage -= 1;
+        this.updateRecordIndex();
+      },
+      nextPage() {
+        if (this.currentPage == this.totalPages) {
+          return;
+        }
+        this.currentPage += 1;
+        this.updateRecordIndex();
+      },
+      toPage(page) {
+        this.currentPage = page;
+        this.updateRecordIndex();
+      },
+      sortBy(columnIndex) {
+        // Toggling sort, by keeping sortOrder boolean variable
+        // True: Asc and False: desc
+        this.filteredRecords.sort((a, b) => {
+          if (this.sortOrder[columnIndex]) {
+            if (isNaN(a[columnIndex]) || isNaN(b[columnIndex])) {
+              return a[columnIndex] > b[columnIndex];
+            } else {
+              return parseInt(a[columnIndex]) > parseInt(b[columnIndex]);
+            }
           } else {
-            return parseInt(a[columnIndex]) > parseInt(b[columnIndex]);
+            if (isNaN(a[columnIndex]) || isNaN(b[columnIndex])) {
+              return a[columnIndex] < b[columnIndex];
+            } else {
+              return parseInt(a[columnIndex]) < parseInt(b[columnIndex]);
+            }
           }
-        } else {
-          if (isNaN(a[columnIndex]) || isNaN(b[columnIndex])) {
-            return a[columnIndex] < b[columnIndex];
-          } else {
-            return parseInt(a[columnIndex]) < parseInt(b[columnIndex]);
+        });
+        // Negating sortOrder
+        this.sortOrder[columnIndex] = !this.sortOrder[columnIndex];
+        this.resetToPage1();
+      },
+      search() {
+        const searchInput = this.searchInput.trim();
+        const col = this.searchByHeaderInput;
+
+        if (searchInput === "") {
+          this.filteredRecords = this.originalRecords.slice(1);
+          this.resetToPage1();
+          return;
+        }
+
+        let searchedRecords = [];
+        const searchInputRE = new RegExp(searchInput, "i")
+        for (let record of this.originalRecords.slice(1)) {
+          if (record[col].search(searchInputRE) != -1) {
+            searchedRecords.push(record);
           }
         }
-      });
-      // Negating sortOrder
-      this.sortOrder[columnIndex] = !this.sortOrder[columnIndex];
-    },
-    search() {
-      const searchInput = this.searchInput.trim();
-      const col = this.searchByHeaderInput;
-
-      if (searchInput === "") {
-        this.filteredRecords = this.originalRecords.slice(1);
-        return;
+        this.filteredRecords = searchedRecords;
+        this.resetToPage1();
+      },
+      resetToPage1() {
+        this.currentPage = 1;
+        this.updateRecordIndex();
+      },
+      scrollToTop() {
+        window.scrollTo(0, 0);
       }
-
-      let searchedRecords = [];
-      const searchInputRE = new RegExp(searchInput, "i")
-      for (let record of this.originalRecords.slice(1)) {
-        if (record[col].search(searchInputRE) != -1) {
-          searchedRecords.push(record);
-        }
-      }
-      this.filteredRecords = searchedRecords;
     },
-    scrollToTop() {
-      window.scrollTo(0, 0);
+    mounted() {
+      // Inserted data using EJS into JS
+      this.originalRecords = <%- JSON.stringify(records) %>;
+      this.filteredRecords = this.originalRecords.slice(1);
+      this.sortOrder = this.originalRecords[0].map(() => true);
+      this.loading = false;
     }
-  }).mount("#csv-content");
+  }).mount("#csv-view-container");
 </script>
