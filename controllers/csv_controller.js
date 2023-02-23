@@ -1,5 +1,6 @@
 import CSV from "../models/csv.js";
 import path from "path";
+import fs from "fs";
 import { getCSVRecords } from "../config/csv_parser.js";
 
 export async function uploadCSVFiles(req, res) {
