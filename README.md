@@ -13,7 +13,7 @@ Web App, To work on CSV Files.
   - Bootstrap
   - Javascript
   - EJS Template Engine
-  - Vue / Petite Vue
+  - Vue
 
 ## Installation
 
