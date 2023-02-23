@@ -1,0 +1,15 @@
+.list-group-item:hover {
+  background-color: rgb(240, 242, 243);
+}
+
+.search-form.input-group > div {
+  flex-grow: 10;
+}
+
+.search-form.input-group > select {
+  flex-grow: 1;
+}
+
+.search-form.input-group > button {
+  flex-grow: 1;
+}

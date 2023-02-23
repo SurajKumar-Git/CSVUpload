@@ -1,0 +1,12 @@
+.red {
+  color: red;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.no-link {
+  text-decoration: none;
+  color: inherit;
+}

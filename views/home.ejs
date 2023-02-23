@@ -1,0 +1,36 @@
+<main id="home" class="container">
+  <form class="mt-3 pb-3 border-bottom" action="/csv/upload" method="post" enctype="multipart/form-data">
+    <label for="csvfilesinput" class="form-label">Select CSV files : </label>
+    <div class="input-group mb-3">
+      <input class="form-control" type="file" id="csvfilesinput" name="csvfiles" multiple accept=".csv" required>
+      <button class="btn btn-outline-primary" type="submit">Upload</button>
+    </div>
+    <div id="selected-files">
+    </div>
+  </form>
+  <section class="csv-files-container container mt-3">
+    <h3 class="fs-3 text">Uploaded Files</h3>
+    <ol class="list-group list-group-flush">
+      <% for(let file of files) { %>
+      <li class="list-group-item d-flex justify-content-between">
+        <span><%= file.originalName  %></span>
+        <span>
+          <button class="btn btn-outline-primary btn-sm">
+            <a href=<%= `/csv/open/${file.id}` %> class="no-link">
+              <i class="fa-solid fa-book-open"></i> Open
+            </a>
+          </button>
+          </button>
+          <button class="btn btn-outline-danger btn-sm">
+            <a href=<%= `/csv/delete/${file.id}` %> class="no-link">
+              <i class="fa-regular fa-trash-can"></i> Delete
+            </a>
+          </button>
+        </span>
+      </li>
+      <% } %>
+    </ol>
+  </section>
+</main>
+
+<script src="/js/home.js"></script>

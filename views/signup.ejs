@@ -1,0 +1,51 @@
+<link rel="stylesheet" href="/css/login_signup.css">
+
+<div class="container">
+  <div class="form-container">
+    <h3 class="fs-3">Sign Up</h3>
+    <hr>
+    <form action="/user/create-user" method="post" id="signupform" @submit="validate(event)">
+      <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" id="name" placeholder="Enter your Name" required>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" name="email" class="form-control" id="email" placeholder="name@example.com" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" id="password" placeholder="Enter Password" required v-model="password">
+      </div>
+      <div class="mb-3">
+        <label for="confirmpassword" class="form-label">Confirm Password</label>
+        <input type="password" name="confirmpassword" class="form-control" id="confirmpassword" placeholder="Confirm Password" required v-model="confirmpassword">
+        <div class="fs-6 text red" v-if="!passwordMatch">
+          Passwords do not match
+        </div>
+      </div>
+
+      <button class="btn btn-outline-primary" type="submit">Sign Up</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import {
+    createApp
+  } from "https://unpkg.com/petite-vue@0.2.2/dist/petite-vue.es.js";
+
+  createApp({
+    password: "",
+    confirmpassword: "",
+    passwordMatch: true,
+
+    validate(event) {
+      this.passwordMatch = true;
+      if (this.password != this.confirmpassword) {
+        event.preventDefault();
+        this.passwordMatch = false;
+      }
+    }
+  }).mount("#signupform");
+</script>
